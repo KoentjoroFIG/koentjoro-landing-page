@@ -68,7 +68,10 @@ const Navbar = ({ children }: Props) => {
     { id: "home", label: "Home" },
     { id: "resume", label: "Resume" },
     { id: "abilities", label: "Abilities" },
-    { id: "bid-to-hire", label: "Bid to Hire" },
+    // Bid to Hire link is feature-flagged (disabled by default)
+    ...(import.meta.env.VITE_ENABLE_BID === "true"
+      ? [{ id: "bid-to-hire", label: "Bid to Hire" }]
+      : []),
     { id: "contact", label: "Contact" },
   ];
 
@@ -99,12 +102,15 @@ const Navbar = ({ children }: Props) => {
                     {item.label}
                   </a>
                 ))}
-                <Button
-                  className="ml-4 bg-sky-500 hover:bg-sky-600 text-white"
-                  onClick={() => setIsSignInOpen(true)}
-                >
-                  Sign In
-                </Button>
+                {/* Show Sign In only when auth feature flag is enabled */}
+                {import.meta.env.VITE_ENABLE_AUTH === "true" && (
+                  <Button
+                    className="ml-4 bg-sky-500 hover:bg-sky-600 text-white"
+                    onClick={() => setIsSignInOpen(true)}
+                  >
+                    Sign In
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -156,14 +162,16 @@ const Navbar = ({ children }: Props) => {
                   {item.label}
                 </a>
               ))}
-              <div className="pt-2">
-                <Button
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white"
-                  onClick={() => setIsSignInOpen(true)}
-                >
-                  Sign In
-                </Button>
-              </div>
+              {import.meta.env.VITE_ENABLE_AUTH === "true" && (
+                <div className="pt-2">
+                  <Button
+                    className="w-full bg-sky-500 hover:bg-sky-600 text-white"
+                    onClick={() => setIsSignInOpen(true)}
+                  >
+                    Sign In
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}

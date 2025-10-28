@@ -18,7 +18,10 @@ const Footer = ({ className = "" }: FooterProps) => {
     { href: "#home", label: "Home" },
     { href: "#resume", label: "Resume" },
     { href: "#abilities", label: "Abilities" },
-    { href: "#bid-to-hire", label: "Bid to Hire" },
+    // Bid to Hire link is feature-flagged
+    ...(import.meta.env.VITE_ENABLE_BID === "true"
+      ? [{ href: "#bid-to-hire", label: "Bid to Hire" }]
+      : []),
     { href: "#contact", label: "Contact" },
   ];
 

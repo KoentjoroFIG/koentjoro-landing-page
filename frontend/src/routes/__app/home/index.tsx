@@ -16,7 +16,8 @@ function RouteComponent() {
       <HeroSection />
       <ResumeSection />
       <AbilitiesSection />
-      <BidToHireSection />
+      {/* Bid section is behind a feature flag while backend is in progress */}
+      {import.meta.env.VITE_ENABLE_BID === "true" && <BidToHireSection />}
       <ContactSection />
       <Footer />
     </div>
