@@ -31,8 +31,8 @@ Thumbs.db
 .gitignore
 
 # Docker
-docker
 Dockerfile
+Dockerfile.*
 .dockerignore
 
 # Testing
