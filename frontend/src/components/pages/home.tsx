@@ -10,7 +10,7 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
       id="home"
       className={`bg-gradient-to-br from-sky-50 to-sky-100 relative overflow-hidden ${className}`}
     >
-      <div className="flex flex-col items-center px-4 sm:px-6 md:px-10 lg:px-20 xl:px-40 py-12 md:py-16 lg:py-20 space-y-6">
+      <div className="flex flex-col items-center px-4 sm:px-6 md:px-10 lg:px-20 xl:px-40 py-18 lg:py-20 space-y-6">
         <div className="flex flex-col lg:flex-row justify-between w-full gap-6 md:gap-8 lg:gap-10">
           <div className="flex flex-col w-full lg:w-1/2 space-y-6 md:space-y-8">
             <div className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold text-gray-800 leading-tight">
@@ -61,40 +61,49 @@ export function HeroSection({ className = "" }: HeroSectionProps) {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 md:p-8 lg:p-10 w-full">
-          <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed text-center">
-            <span className="text-sky-600 font-medium">
-              Versatile and fast-learning
-            </span>{" "}
-            <span className="font-semibold text-gray-800">
-              Software Engineer
-            </span>{" "}
-            with production experience building{" "}
-            <span className="text-sky-600 font-medium">
-              full-stack AI applications
-            </span>{" "}
-            across web, desktop, and mobile platforms. Skilled in{" "}
-            <span className="text-sky-600 font-medium">
-              Python (FastAPI, TensorFlow, PyTorch)
-            </span>
-            , <span className="text-sky-600 font-medium">React TypeScript</span>
-            , and cloud integrations on{" "}
-            <span className="text-sky-600 font-medium">AWS/GCP</span>.
-            Experienced developing{" "}
-            <span className="text-sky-600 font-medium">
-              Multi Agent AI systems
-            </span>{" "}
-            with LangChain/LangGraph and deploying{" "}
-            <span className="text-sky-600 font-medium">
-              containerized services
-            </span>{" "}
-            with Docker.
-          </p>
+        <div className="relative bg-gradient-to-br from-sky-600 to-sky-700 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-3 md:p-5 lg:p-7 w-full overflow-hidden group">
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse delay-1000"></div>
+          </div>
+
+          <div className="relative text-center">
+            <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
+              <span className="inline-block hover:scale-105 transition-transform duration-300">
+                "I Could Build A
+              </span>{" "}
+              <span className="inline-block bg-white text-sky-600 px-3 py-1 rounded-lg hover:scale-110 transition-transform duration-300 shadow-lg">
+                Time Machine
+              </span>
+              <span className="inline-block hover:scale-105 transition-transform duration-300">
+                "
+              </span>
+            </p>
+
+            <div className="flex items-center justify-center gap-3 pt-3">
+              <div className="h-px w-12 bg-white/50"></div>
+              <div className="text-white/90 text-xs md:text-sm font-semibold tracking-wider uppercase">
+                My Motto
+              </div>
+              <div className="h-px w-12 bg-white/50"></div>
+            </div>
+
+            <p className="text-base sm:text-lg md:text-xl text-white/95 leading-relaxed max-w-4xl mx-auto font-medium">
+              Not because I have all the answers, but because{" "}
+              <span className="text-yellow-300 font-bold">
+                I'm determined to learn
+              </span>{" "}
+              whatever it takes to make the{" "}
+              <span className="text-yellow-300 font-bold">
+                impossible possible
+              </span>
+              .
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Wave SVG */}
-      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none rotate-180">
         <svg
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"
