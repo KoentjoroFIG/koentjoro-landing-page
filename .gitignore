@@ -60,7 +60,7 @@ htmlcov/
 ### Docker
 # Local docker-compose overrides
 docker-compose.override.yml
-docker-compose.*.yml
+# docker-compose.*.yml
 
 # Docker build artifacts
 **/docker-compose.override.yml

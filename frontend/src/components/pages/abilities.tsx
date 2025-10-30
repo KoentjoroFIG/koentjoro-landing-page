@@ -11,7 +11,6 @@ import { CppIcon } from "@/components/atoms/Icons/cpp";
 import { DockerIcon } from "@/components/atoms/Icons/docker";
 import { ElectronIcon } from "@/components/atoms/Icons/electron";
 import { FastapiIcon } from "@/components/atoms/Icons/fastapi";
-import { GoIcon } from "@/components/atoms/Icons/go";
 import { GraphqlIcon } from "@/components/atoms/Icons/graphql";
 import { JavaScriptIcon } from "@/components/atoms/Icons/javascript";
 import { LangchainIcon } from "@/components/atoms/Icons/langchain";
@@ -25,7 +24,6 @@ import { PythonIcon } from "@/components/atoms/Icons/python";
 import { PytorchIcon } from "@/components/atoms/Icons/pytorch";
 import { ReactIcon } from "@/components/atoms/Icons/react";
 import { RedisIcon } from "@/components/atoms/Icons/redis";
-import { RustIcon } from "@/components/atoms/Icons/rust";
 import { SqlalchemyIcon } from "@/components/atoms/Icons/sqlalchemy";
 import { StrawberryIcon } from "@/components/atoms/Icons/strawberry";
 import { TensorflowIcon } from "@/components/atoms/Icons/tensorflow";
@@ -43,8 +41,8 @@ export function AbilitiesSection({ className = "" }: AbilitiesSectionProps) {
     { Component: TypeScriptIcon, size: 120, label: "TypeScript" },
     { Component: CppIcon, size: 120, label: "C++" },
     { Component: CIcon, size: 120, label: "C" },
-    { Component: GoIcon, size: 180, label: "Go" },
-    { Component: RustIcon, size: 120, label: "Rust" },
+    // { Component: GoIcon, size: 180, label: "Go" },
+    // { Component: RustIcon, size: 120, label: "Rust" },
   ];
 
   const FrameworkIcons = [

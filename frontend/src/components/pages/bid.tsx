@@ -151,30 +151,6 @@ export function BidToHireSection({ className = "" }: BidToHireSectionProps) {
                 </li>
               </ol>
             </div>
-
-            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 md:mb-8">
-                Why Companies Love This
-              </h3>
-              <ul className="space-y-3 text-gray-600">
-                <li className="flex items-start">
-                  <span className="text-sky-500 mr-3">✓</span>
-                  Direct access to top talent
-                </li>
-                <li className="flex items-start">
-                  <span className="text-sky-500 mr-3">✓</span>
-                  Competitive but transparent process
-                </li>
-                <li className="flex items-start">
-                  <span className="text-sky-500 mr-3">✓</span>
-                  Quick response times
-                </li>
-                <li className="flex items-start">
-                  <span className="text-sky-500 mr-3">✓</span>
-                  No recruitment agency fees
-                </li>
-              </ul>
-            </div>
           </div>
 
           <div className="bg-white rounded-xl p-6 md:p-8 lg:p-10 shadow-lg">

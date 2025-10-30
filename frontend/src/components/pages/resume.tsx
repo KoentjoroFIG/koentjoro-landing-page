@@ -176,11 +176,27 @@ export function ResumeSection({ className = "" }: ResumeSectionProps) {
 
         {/* Download CV */}
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 md:mt-12">
-          <Button className="bg-sky-500 hover:bg-sky-600 text-white px-8 md:px-10 py-3 md:py-4 text-lg font-semibold rounded-lg shadow-lg w-full sm:w-auto">
+          <Button
+            className="bg-sky-500 hover:bg-sky-600 text-white px-8 md:px-10 py-3 md:py-4 text-lg font-semibold rounded-lg shadow-lg w-full sm:w-auto"
+            onClick={() =>
+              window.open(
+                "https://drive.google.com/file/d/1TBuaWJ7Mz8CZUmFPEoxc4cdJpHQbL2eo/view?usp=sharing",
+                "_blank"
+              )
+            }
+          >
             <i className="fas fa-download mr-2"></i>
             Download CV
           </Button>
-          <Button className="bg-purple-500 hover:bg-purple-600 text-white px-8 md:px-10 py-3 md:py-4 text-lg font-semibold rounded-lg shadow-lg w-full sm:w-auto">
+          <Button
+            className="bg-purple-500 hover:bg-purple-600 text-white px-8 md:px-10 py-3 md:py-4 text-lg font-semibold rounded-lg shadow-lg w-full sm:w-auto"
+            onClick={() =>
+              window.open(
+                "https://drive.google.com/file/d/1t5rUdGd4FVsbBLdBwJ45nb17XgxmHIvQ/view?usp=sharing",
+                "_blank"
+              )
+            }
+          >
             <i className="fas fa-download mr-2"></i>
             履歴書をダウンロード
           </Button>
