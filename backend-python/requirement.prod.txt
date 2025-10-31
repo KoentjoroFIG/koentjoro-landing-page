@@ -1,0 +1,9 @@
+fastapi[standard]
+uvicorn[standard]
+pydantic
+strawberry-graphql[fastapi]
+beanie
+pydantic-settings
+pyjwt
+passlib[bcrypt]
+pymongo

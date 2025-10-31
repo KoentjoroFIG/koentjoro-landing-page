@@ -1,17 +1,21 @@
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
 from fastapi import FastAPI
 from src.core.config import settings
-from src.database.db import init_db, close_db
-from contextlib import asynccontextmanager
+from src.database.db import close_db, init_db
+
+from .utils import get_health_status
+
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await init_db()
-    print("Database initialized")
     yield
     await close_db()
-    print("Database disconnected")
 
-def init_app():
+
+def init_app() -> FastAPI:
     app = FastAPI(
         title="KoentjoroProfile",
         description="""
@@ -23,19 +27,15 @@ def init_app():
     )
 
     @app.get("/health")
-    async def health_check():
-        return {"status": "All praise to Allah"}
+    async def health_check() -> dict:
+        return await get_health_status()
 
     return app
+
 
 app = init_app()
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        "main:app",
-        host="localhost",
-        port=1911,
-        reload=True
-    )
+    uvicorn.run("main:app", host="localhost", port=1911, reload=True)

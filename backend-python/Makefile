@@ -1,10 +1,16 @@
 # Install dependencies
-install-deps:
-	pip install -r requirement.txt
+install-dev-deps:
+	pip install -r requirement.dev.txt
+
+install-prod-deps:
+	pip install -r requirement.prod.txt
 
 # uv.lock file
-update-lock:
-	uv pip compile requirement.txt -o uv.lock
+update-dev-lock:
+	uv pip compile requirement.dev.txt -o uv.dev.lock
+
+update-prod-lock:
+	uv pip compile requirement.prod.txt -o uv.prod.lock
 
 # Run the application
 run:

@@ -7,3 +7,7 @@ pydantic-settings
 pyjwt
 passlib[bcrypt]
 pymongo
+pytest
+pytest-mock
+pytest-asyncio
+pre-commit
