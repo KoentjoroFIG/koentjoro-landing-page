@@ -14,7 +14,7 @@ def reset_db_client(mocker: MockerFixture) -> Generator[None, None]:
 
 
 @pytest.mark.asyncio
-async def test_get_health_status(mocker: MockerFixture) -> None:
+async def test_get_health_status(mocker: MockerFixture):
     mock_client_instance = mocker.AsyncMock()
     mock_client_instance.admin.command.return_value = {"ok": 1}
     mocker.patch("src.database.db._client", mock_client_instance)
@@ -29,7 +29,7 @@ async def test_get_health_status(mocker: MockerFixture) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_health_status_unhealthy(mocker: MockerFixture) -> None:
+async def test_get_health_status_unhealthy(mocker: MockerFixture):
     mock_client_instance = mocker.AsyncMock()
     mock_client_instance.admin.command = mocker.AsyncMock(side_effect=ConnectionFailure)
     mocker.patch("src.database.db._client", mock_client_instance)
@@ -41,3 +41,14 @@ async def test_get_health_status_unhealthy(mocker: MockerFixture) -> None:
     }
 
     mock_client_instance.admin.command.assert_awaited_once_with("ping")
+
+
+@pytest.mark.asyncio
+async def test_get_health_status_no_client(mocker: MockerFixture):
+    mocker.patch("src.database.db._client", None)
+
+    assert await get_health_status() == {
+        "server_status": "running",
+        "database_status": "not_found",
+        "message": "Server is unhealthy [DB Not Found]",
+    }
