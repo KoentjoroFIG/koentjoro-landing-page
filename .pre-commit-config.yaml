@@ -9,7 +9,11 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: [flake8-annotations]
-        args: [--extend-ignore=E501]
+        args:
+          [
+            --extend-ignore=E501,
+            --per-file-ignores=backend-python/test/*:ANN201,
+          ]
         language_version: python3.14
   - repo: https://github.com/psf/black
     rev: 25.9.0

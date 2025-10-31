@@ -1,5 +1,3 @@
-from typing import Generator
-
 import pytest
 from pymongo.errors import ConnectionFailure
 from pytest_mock import MockerFixture
@@ -8,7 +6,7 @@ from src.database.db import close_db, get_client, get_session, init_db
 
 
 @pytest.fixture(autouse=True)
-def reset_db_client(mocker: MockerFixture) -> Generator[None, None]:
+def reset_db_client(mocker: MockerFixture):
     mocker.patch("src.database.db._client", None)
     yield
     mocker.patch("src.database.db._client", None)
