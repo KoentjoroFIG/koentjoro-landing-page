@@ -8,11 +8,17 @@ async def get_health_status() -> dict:
     try:
         if _client:
             await _client.admin.command("ping")
-        overall_status = {
-            "server_status": "running",
-            "database_status": "connected",
-            "message": "All praise to Allah",
-        }
+            overall_status = {
+                "server_status": "running",
+                "database_status": "connected",
+                "message": "All praise to Allah",
+            }
+        else:
+            overall_status = {
+                "server_status": "running",
+                "database_status": "not_found",
+                "message": "Server is unhealthy [DB Not Found]",
+            }
     except ConnectionFailure:
         overall_status = {
             "server_status": "running",
