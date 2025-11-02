@@ -4,14 +4,14 @@ import pytest
 from pymongo.errors import ConnectionFailure
 from pytest_mock import MockerFixture
 from src.core.config import settings
-from src.database.db import close_db, get_client, get_session, init_db
+from src.database.db import DatabaseManager
 
 
 @pytest.fixture(autouse=True)
 def reset_db_client(mocker: MockerFixture) -> Generator[None, None]:
-    mocker.patch("src.database.db._client", None)
+    mocker.patch.object(DatabaseManager, "_DatabaseManager__client", None)
     yield
-    mocker.patch("src.database.db._client", None)
+    mocker.patch.object(DatabaseManager, "_DatabaseManager__client", None)
 
 
 @pytest.mark.asyncio
@@ -29,7 +29,7 @@ async def test_init_db(mocker: MockerFixture):
         "src.database.db.init_beanie", new=mocker.AsyncMock(return_value=None)
     )
 
-    await init_db(models=[])
+    await DatabaseManager.init_db(models=[])
 
     mock_client_class.assert_called_once_with(
         settings.CONNECTION_STRING.get_secret_value(),
@@ -55,7 +55,7 @@ async def test_init_db_connection_failure(mocker: MockerFixture):
 
     mock_init_beanie = mocker.patch("src.database.db.init_beanie")
 
-    await init_db(models=[])
+    await DatabaseManager.init_db(models=[])
 
     mock_client_instance.admin.command.assert_called_once_with("ping")
 
@@ -67,13 +67,13 @@ async def test_init_db_already_initialized(mocker: MockerFixture):
     """Test that init_db skips initialization if client already exists."""
     existing_client = mocker.AsyncMock()
 
-    mocker.patch("src.database.db._client", existing_client)
+    mocker.patch.object(DatabaseManager, "_DatabaseManager__client", existing_client)
 
     mock_client_class = mocker.patch("src.database.db.AsyncMongoClient")
 
     mock_init_beanie = mocker.patch("src.database.db.init_beanie")
 
-    await init_db()
+    await DatabaseManager.init_db()
 
     mock_client_class.assert_not_called()
 
@@ -103,7 +103,7 @@ async def test_init_db_with_models(mocker: MockerFixture):
     )
 
     test_models = [MockUserModel, MockEmailModel]
-    await init_db(models=test_models)
+    await DatabaseManager.init_db(models=test_models)
 
     mock_init_beanie.assert_called_once_with(
         database=mock_database, document_models=test_models
@@ -116,9 +116,11 @@ async def test_close_db(mocker: MockerFixture):
     mock_client_instance = mocker.AsyncMock()
     mock_client_instance.close = mocker.AsyncMock()
 
-    mocker.patch("src.database.db._client", mock_client_instance)
+    mocker.patch.object(
+        DatabaseManager, "_DatabaseManager__client", mock_client_instance
+    )
 
-    await close_db()
+    await DatabaseManager.close_db()
 
     mock_client_instance.close.assert_called_once()
 
@@ -126,18 +128,20 @@ async def test_close_db(mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_close_db_no_client(mocker: MockerFixture):
     """Test closing database when no client exists."""
-    mocker.patch("src.database.db._client", None)
+    mocker.patch.object(DatabaseManager, "_DatabaseManager__client", None)
 
-    await close_db()
+    await DatabaseManager.close_db()
 
 
 @pytest.mark.asyncio
 async def test_get_client(mocker: MockerFixture):
     """Test getting the database client."""
     mock_client_instance = mocker.AsyncMock()
-    mocker.patch("src.database.db._client", mock_client_instance)
+    mocker.patch.object(
+        DatabaseManager, "_DatabaseManager__client", mock_client_instance
+    )
 
-    client = get_client()
+    client = DatabaseManager.get_client()
 
     assert client is mock_client_instance
 
@@ -149,9 +153,11 @@ async def test_get_session(mocker: MockerFixture):
     mock_session = mocker.Mock()
     mock_client_instance.start_session = mocker.Mock(return_value=mock_session)
 
-    mocker.patch("src.database.db._client", mock_client_instance)
+    mocker.patch.object(
+        DatabaseManager, "_DatabaseManager__client", mock_client_instance
+    )
 
-    session = await get_session()
+    session = await DatabaseManager.get_session()
 
     mock_client_instance.start_session.assert_called_once()
     assert session is mock_session
@@ -160,8 +166,38 @@ async def test_get_session(mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_get_session_no_client(mocker: MockerFixture):
     """Test getting a session when no client exists."""
-    mocker.patch("src.database.db._client", None)
+    mocker.patch.object(DatabaseManager, "_DatabaseManager__client", None)
 
-    session = await get_session()
+    session = await DatabaseManager.get_session()
 
     assert session is None
+
+
+@pytest.mark.asyncio
+async def test_ping_db_success(mocker: MockerFixture):
+    mock_client_instance = mocker.AsyncMock()
+    mock_client_instance.admin.command = mocker.AsyncMock(return_value={"ok": 1})
+
+    mocker.patch.object(
+        DatabaseManager, "_DatabaseManager__client", mock_client_instance
+    )
+
+    is_pinged = await DatabaseManager.ping_db()
+
+    mock_client_instance.admin.command.assert_called_once_with("ping")
+    assert is_pinged is True
+
+
+@pytest.mark.asyncio
+async def test_ping_db_failure(mocker: MockerFixture):
+    mock_client_instance = mocker.AsyncMock()
+    mock_client_instance.admin.command = mocker.AsyncMock(side_effect=ConnectionFailure)
+
+    mocker.patch.object(
+        DatabaseManager, "_DatabaseManager__client", mock_client_instance
+    )
+
+    is_pinged = await DatabaseManager.ping_db()
+
+    mock_client_instance.admin.command.assert_called_once_with("ping")
+    assert is_pinged is False

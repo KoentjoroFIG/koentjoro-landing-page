@@ -1,28 +1,37 @@
-from pymongo.errors import ConnectionFailure
-
-from .database.db import get_client
+from .database.db import DatabaseManager
 
 
 async def get_health_status() -> dict:
-    _client = get_client()
-    try:
-        if _client:
-            await _client.admin.command("ping")
-            overall_status = {
-                "server_status": "running",
-                "database_status": "connected",
-                "message": "All praise to Allah",
-            }
-        else:
-            overall_status = {
-                "server_status": "running",
-                "database_status": "not_found",
-                "message": "Server is unhealthy [DB Not Found]",
-            }
-    except ConnectionFailure:
+    """
+    Get the health status of the server and database.
+
+    Returns:
+        dict: A dictionary containing server and database status.
+
+    Example:
+        >>> status = await get_health_status()
+        >>> print(status)
+        {
+            "server_status": "running",
+            "database_status": "connected",
+            "message": "All praise to Allah",
+        }
+    """
+    is_pinged = await DatabaseManager.ping_db()
+
+    if is_pinged:
         overall_status = {
             "server_status": "running",
-            "database_status": "disconnected",
-            "message": "Server is unhealthy [DB Disconnected]",
+            "database_status": "connected",
+            "message": "All praise to Allah",
         }
+    else:
+        client = DatabaseManager.get_client()
+        database_status = "not_found" if client is None else "disconnected"
+        overall_status = {
+            "server_status": "running",
+            "database_status": database_status,
+            "message": f"Server is unhealthy [DB {database_status.replace('_', ' ').title()}]",
+        }
+
     return overall_status

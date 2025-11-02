@@ -3,16 +3,16 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from src.core.config import settings
-from src.database.db import close_db, init_db
+from src.database.db import DatabaseManager
 
 from .utils import get_health_status
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    await init_db()
+    await DatabaseManager.init_db()
     yield
-    await close_db()
+    await DatabaseManager.close_db()
 
 
 def init_app() -> FastAPI:
