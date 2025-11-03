@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from src.core.config import settings
 from src.database.db import DatabaseManager
 
-from .utils import get_health_status
+from .utils.monitor import MonitorUtils
 
 
 @asynccontextmanager
@@ -28,7 +28,7 @@ def init_app() -> FastAPI:
 
     @app.get("/health")
     async def health_check() -> dict:
-        return await get_health_status()
+        return await MonitorUtils.get_health_status()
 
     return app
 

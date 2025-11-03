@@ -4,8 +4,10 @@ from beanie import Document
 from pydantic import EmailStr, Field
 from src.api.auth.schema import AuthMethod
 from src.database.base_model import SoftDeleteModel, TimestampedModel
+from src.utils.model_registration import ModelRegistration
 
 
+@ModelRegistration.register_model
 class UserModel(Document, TimestampedModel, SoftDeleteModel):
     """User model for storing user information."""
 

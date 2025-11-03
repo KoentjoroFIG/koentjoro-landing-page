@@ -1,31 +1,31 @@
 name: koentjoro
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: ./docker/Dockerfile
-    networks:
-      - frontend
-    ports:
-      - "5173:5173"
-    command: ["pnpm", "run", "dev", "--host", "0.0.0.0", "--port", "5173"]
-    volumes:
-      - ./frontend:/frontend:cached
-      - frontend_node_modules:/frontend/node_modules
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost:5173/",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: ./docker/Dockerfile
+  #   networks:
+  #     - frontend
+  #   ports:
+  #     - "5173:5173"
+  #   command: ["pnpm", "run", "dev", "--host", "0.0.0.0", "--port", "5173"]
+  #   volumes:
+  #     - ./frontend:/frontend:cached
+  #     - frontend_node_modules:/frontend/node_modules
+  #   healthcheck:
+  #     test:
+  #       [
+  #         "CMD",
+  #         "wget",
+  #         "--no-verbose",
+  #         "--tries=1",
+  #         "--spider",
+  #         "http://localhost:5173/",
+  #       ]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
 
   mongodb:
     image: mongodb/mongodb-community-server:8.0.15-ubuntu2204

@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     # MONGODB_SERVER_SELECTION_TIMEOUT_MS: int
     # MONGODB_SOCKET_TIMEOUT_MS: int
 
+    # JWT Settings
+    JWT_SECRET: SecretStr = SecretStr("")
+    JWT_ALGORITHM: str = "HS256"
+
     model_config = SettingsConfigDict(
         case_sensitive=True,
         env_file=Path(__file__).resolve().parents[2] / ".env",
@@ -31,7 +35,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    settings = Settings()  # type: ignore[Args]
+    settings = Settings()
     try:
         return settings
     finally:

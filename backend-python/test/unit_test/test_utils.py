@@ -3,7 +3,7 @@ from typing import Generator
 import pytest
 from pytest_mock import MockerFixture
 from src.database.db import DatabaseManager
-from src.utils import get_health_status
+from src.utils.monitor import MonitorUtils
 
 
 @pytest.fixture(autouse=True)
@@ -18,7 +18,7 @@ async def test_get_health_status_connected(mocker: MockerFixture):
     """Test health status when database is connected and ping succeeds"""
     mock_ping = mocker.patch.object(DatabaseManager, "ping_db", return_value=True)
 
-    result = await get_health_status()
+    result = await MonitorUtils.get_health_status()
 
     assert result == {
         "server_status": "running",
@@ -37,7 +37,7 @@ async def test_get_health_status_disconnected(mocker: MockerFixture):
         DatabaseManager, "get_client", return_value=mock_client
     )
 
-    result = await get_health_status()
+    result = await MonitorUtils.get_health_status()
 
     assert result == {
         "server_status": "running",
@@ -56,7 +56,7 @@ async def test_get_health_status_not_found(mocker: MockerFixture):
         DatabaseManager, "get_client", return_value=None
     )
 
-    result = await get_health_status()
+    result = await MonitorUtils.get_health_status()
 
     assert result == {
         "server_status": "running",
@@ -65,3 +65,7 @@ async def test_get_health_status_not_found(mocker: MockerFixture):
     }
     mock_ping.assert_awaited_once()
     mock_get_client.assert_called_once()
+
+
+async def test_register_model(mocker: MockerFixture):
+    pass

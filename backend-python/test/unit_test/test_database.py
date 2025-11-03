@@ -5,13 +5,18 @@ from pymongo.errors import ConnectionFailure
 from pytest_mock import MockerFixture
 from src.core.config import settings
 from src.database.db import DatabaseManager
+from src.utils.model_registration import ModelRegistration
 
 
 @pytest.fixture(autouse=True)
-def reset_db_client(mocker: MockerFixture) -> Generator[None, None]:
+def setup(mocker: MockerFixture) -> Generator[None, None]:
     mocker.patch.object(DatabaseManager, "_DatabaseManager__client", None)
+    original_models = ModelRegistration.get_raw_registered_models()
     yield
     mocker.patch.object(DatabaseManager, "_DatabaseManager__client", None)
+    mocker.patch.object(
+        ModelRegistration, "_ModelRegistration__registered_model", original_models
+    )
 
 
 @pytest.mark.asyncio
@@ -25,11 +30,13 @@ async def test_init_db(mocker: MockerFixture):
         "src.database.db.AsyncMongoClient", return_value=mock_client_instance
     )
 
+    mocker.patch.object(ModelRegistration, "get_registered_models", return_value=[])
+
     mock_init_beanie = mocker.patch(
         "src.database.db.init_beanie", new=mocker.AsyncMock(return_value=None)
     )
 
-    await DatabaseManager.init_db(models=[])
+    await DatabaseManager.init_db()
 
     mock_client_class.assert_called_once_with(
         settings.CONNECTION_STRING.get_secret_value(),
@@ -55,7 +62,7 @@ async def test_init_db_connection_failure(mocker: MockerFixture):
 
     mock_init_beanie = mocker.patch("src.database.db.init_beanie")
 
-    await DatabaseManager.init_db(models=[])
+    await DatabaseManager.init_db()
 
     mock_client_instance.admin.command.assert_called_once_with("ping")
 
@@ -83,12 +90,17 @@ async def test_init_db_already_initialized(mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_init_db_with_models(mocker: MockerFixture):
     """Test database initialization with document models."""
+    # Create mock model classes
+    MockUserModel = mocker.Mock()
+    MockUserModel.__name__ = "MockUserModel"
+    MockEmailModel = mocker.Mock()
+    MockEmailModel.__name__ = "MockEmailModel"
 
-    class MockUserModel:
-        pass
-
-    class MockEmailModel:
-        pass
+    # Mock the get_registered_models to return our test models
+    test_models = [MockUserModel, MockEmailModel]
+    mocker.patch.object(
+        ModelRegistration, "get_registered_models", return_value=test_models
+    )
 
     mock_database = mocker.Mock()
 
@@ -102,8 +114,7 @@ async def test_init_db_with_models(mocker: MockerFixture):
         "src.database.db.init_beanie", new=mocker.AsyncMock(return_value=None)
     )
 
-    test_models = [MockUserModel, MockEmailModel]
-    await DatabaseManager.init_db(models=test_models)
+    await DatabaseManager.init_db()
 
     mock_init_beanie.assert_called_once_with(
         database=mock_database, document_models=test_models

@@ -1,10 +1,11 @@
-from typing import Optional, Sequence
+from typing import Optional, Type
 
 from beanie import init_beanie
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.client_session import AsyncClientSession
 from pymongo.errors import ConnectionFailure
 from src.core.config import settings
+from src.utils.model_registration import ModelRegistration
 
 
 class DatabaseManager:
@@ -28,9 +29,7 @@ class DatabaseManager:
     __client: Optional[AsyncMongoClient] = None
 
     @classmethod
-    async def init_db(
-        cls: type["DatabaseManager"], models: Sequence[type] = []
-    ) -> None:
+    async def init_db(cls: Type["DatabaseManager"]) -> None:
         """
         Initialize the database connection and Beanie ODM with the provided document models.
 
@@ -38,12 +37,8 @@ class DatabaseManager:
         verifies connectivity by pinging the server, and initializes Beanie with the given models.
         If the client is already initialized, this method does nothing. This method returns `None`.
 
-        Args:
-            models (Sequence[type], optional): A sequence of Beanie Document model classes to register.
-                Defaults to an empty list.
-
         Example:
-            >>> await DatabaseManager.init_db(models=[User, Product])
+            >>> await DatabaseManager.init_db()
         """
         try:
             if cls.__client is None:  # Updated reference
@@ -70,7 +65,7 @@ class DatabaseManager:
                         database=cls.__client.get_database(
                             settings.MONGODB_NAME
                         ),  # Updated reference
-                        document_models=models,
+                        document_models=ModelRegistration.get_registered_models(),
                     )
                     print("Beanie/Database initialized successfully")
 
@@ -79,7 +74,7 @@ class DatabaseManager:
             raise e
 
     @classmethod
-    async def close_db(cls: type["DatabaseManager"]) -> None:
+    async def close_db(cls: Type["DatabaseManager"]) -> None:
         """
         Close the database connection if it exists.
 
@@ -100,7 +95,7 @@ class DatabaseManager:
             print("No database connection to close")
 
     @classmethod
-    def get_client(cls: type["DatabaseManager"]) -> Optional[AsyncMongoClient]:
+    def get_client(cls: Type["DatabaseManager"]) -> Optional[AsyncMongoClient]:
         """
         Retrieve the current MongoDB client instance.
 
@@ -120,7 +115,7 @@ class DatabaseManager:
         return cls.__client  # Updated reference
 
     @classmethod
-    async def get_session(cls: type["DatabaseManager"]) -> Optional[AsyncClientSession]:
+    async def get_session(cls: Type["DatabaseManager"]) -> Optional[AsyncClientSession]:
         """
         Start and return a new MongoDB client session.
 
@@ -145,7 +140,7 @@ class DatabaseManager:
         return cls.__client.start_session()  # Updated reference
 
     @classmethod
-    async def ping_db(cls: type["DatabaseManager"]) -> bool:
+    async def ping_db(cls: Type["DatabaseManager"]) -> bool:
         """
         Ping the MongoDB server to verify connectivity.
 
