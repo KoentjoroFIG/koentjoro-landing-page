@@ -9,6 +9,3 @@ run-prod:
 
 build-prod:
 	docker compose -f docker-compose.prod.yml up --build -d
-
-run-backend:
-	cd backend-python && make run
