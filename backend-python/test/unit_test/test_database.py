@@ -90,13 +90,11 @@ async def test_init_db_already_initialized(mocker: MockerFixture):
 @pytest.mark.asyncio
 async def test_init_db_with_models(mocker: MockerFixture):
     """Test database initialization with document models."""
-    # Create mock model classes
     MockUserModel = mocker.Mock()
     MockUserModel.__name__ = "MockUserModel"
     MockEmailModel = mocker.Mock()
     MockEmailModel.__name__ = "MockEmailModel"
 
-    # Mock the get_registered_models to return our test models
     test_models = [MockUserModel, MockEmailModel]
     mocker.patch.object(
         ModelRegistration, "get_registered_models", return_value=test_models

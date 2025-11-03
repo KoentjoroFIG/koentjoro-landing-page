@@ -65,7 +65,3 @@ async def test_get_health_status_not_found(mocker: MockerFixture):
     }
     mock_ping.assert_awaited_once()
     mock_get_client.assert_called_once()
-
-
-async def test_register_model(mocker: MockerFixture):
-    pass
