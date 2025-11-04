@@ -3,6 +3,7 @@ from typing import Generator
 import pytest
 from pymongo.errors import ConnectionFailure
 from pytest_mock import MockerFixture
+
 from src.core.config import settings
 from src.database.db import DatabaseManager
 from src.utils.model_registration import ModelRegistration

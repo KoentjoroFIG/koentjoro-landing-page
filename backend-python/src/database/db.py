@@ -4,6 +4,7 @@ from beanie import init_beanie
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.client_session import AsyncClientSession
 from pymongo.errors import ConnectionFailure
+
 from src.core.config import settings
 from src.utils.model_registration import ModelRegistration
 

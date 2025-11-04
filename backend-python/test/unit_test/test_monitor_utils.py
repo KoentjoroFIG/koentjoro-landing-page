@@ -2,6 +2,7 @@ from typing import Generator
 
 import pytest
 from pytest_mock import MockerFixture
+
 from src.database.db import DatabaseManager
 from src.utils.monitor import MonitorUtils
 

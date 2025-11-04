@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
 from pytest_mock import MockerFixture
+
 from src.api.auth.model import UserModel
 from src.api.auth.schema import AuthMethod
 

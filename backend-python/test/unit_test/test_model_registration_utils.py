@@ -3,6 +3,7 @@ from typing import Generator
 import pytest
 from beanie import Document
 from pytest_mock import MockerFixture
+
 from src.utils.model_registration import ModelRegistration
 
 

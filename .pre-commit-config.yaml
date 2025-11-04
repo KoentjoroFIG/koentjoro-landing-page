@@ -25,3 +25,4 @@ repos:
     hooks:
       - id: isort
         language_version: python3.14
+        args: ["--profile", "black"]

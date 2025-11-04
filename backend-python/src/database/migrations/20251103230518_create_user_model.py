@@ -2,6 +2,7 @@ from typing import Self, Type
 
 from beanie import free_fall_migration
 from pymongo.asynchronous.client_session import AsyncClientSession
+
 from src.api.auth.model import UserModel
 
 

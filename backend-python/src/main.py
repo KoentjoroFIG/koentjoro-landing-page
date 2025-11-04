@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from src.core.config import settings
 from src.database.db import DatabaseManager
 
