@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from src.core.config import settings
 from src.database.db import DatabaseManager
 
@@ -29,6 +30,14 @@ def init_app() -> FastAPI:
     @app.get("/health")
     async def health_check() -> dict:
         return await MonitorUtils.get_health_status()
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["localhost:1911", "http://localhost:1911"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     return app
 

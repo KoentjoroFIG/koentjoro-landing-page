@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     # JWT Settings
     JWT_SECRET: SecretStr = SecretStr("")
     JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
 
     model_config = SettingsConfigDict(
         case_sensitive=True,
@@ -35,11 +37,11 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    settings = Settings()
     try:
+        settings = Settings()
         return settings
-    finally:
-        del settings
+    except ValidationError as e:
+        raise SystemExit(f"Failed to start due to config errors: {e.errors()}.")
 
 
 settings = get_settings()
