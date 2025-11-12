@@ -6,9 +6,8 @@ services:
       dockerfile: ./docker/Dockerfile.prod
     networks:
       - frontend
-    ports:
-      - "80:80"
-      - "443:443"
+      - shared_proxy_network
+    # Ports removed - accessed via reverse proxy
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
 
@@ -18,3 +17,5 @@ volumes:
 networks:
   backend:
   frontend:
+  shared_proxy_network:
+    external: true
