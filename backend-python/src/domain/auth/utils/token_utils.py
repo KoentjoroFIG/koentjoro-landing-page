@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Self
+from typing import Optional, Self, override
 
 import jwt
 from pydantic import SecretStr
@@ -111,6 +111,7 @@ class JWTAccessToken(TokenStrategy, BaseJWT):
         self.algorithm = algorithm
         self.expires_in = expires_in
 
+    @override
     def encode(self: Self, payload: dict) -> Optional[str]:
         """
         Encode the given payload into a JWT access token.
@@ -123,6 +124,7 @@ class JWTAccessToken(TokenStrategy, BaseJWT):
         """
         return self.__encode(payload, self.secret_key, self.algorithm, self.expires_in)
 
+    @override
     def decode(self: Self, token: str) -> Optional[dict]:
         """
         Decode the given JWT access token into a payload.
@@ -153,6 +155,7 @@ class JWTRefreshToken(TokenStrategy, BaseJWT):
         self.algorithm = algorithm
         self.expires_in = expires_in
 
+    @override
     def encode(self: Self, payload: dict) -> Optional[str]:
         """
         Encode the given payload into a JWT refresh token.
@@ -165,6 +168,7 @@ class JWTRefreshToken(TokenStrategy, BaseJWT):
         """
         return self.__encode(payload, self.secret_key, self.algorithm, self.expires_in)
 
+    @override
     def decode(self: Self, token: str) -> Optional[dict]:
         """
         Decode the given JWT refresh token into a payload.

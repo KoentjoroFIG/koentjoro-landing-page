@@ -8,8 +8,8 @@ from beanie import Document, Link
 from bson import ObjectId
 from pydantic import EmailStr, Field, SecretStr, model_validator
 
-from src.api.auth.schema import AuthMethod
 from src.database.base_model import ExpireableModel, SoftDeleteModel, TimestampedModel
+from src.domain.auth.schema import AuthMethod
 from src.utils.model_registration import ModelRegistration
 
 

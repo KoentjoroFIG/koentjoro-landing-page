@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
+from src.core.logger import logger_config
+from src.core.logger import logger_main as logger
 from src.database.db import DatabaseManager
 
 from .utils.monitor import MonitorUtils
@@ -12,9 +14,20 @@ from .utils.monitor import MonitorUtils
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    await DatabaseManager.init_db()
+    try:
+        logger_config.setup_logger()
+        await DatabaseManager.init_db()
+    except Exception as e:
+        logger.critical(f"Error during startup: {e}")
+        raise e
     yield
-    await DatabaseManager.close_db()
+    try:
+        await DatabaseManager.close_db()
+        logger.info("Application shutdown completed successfully.")
+        logger_config.stop_logger()
+    except Exception as e:
+        logger.critical(f"Error during shutdown: {e}")
+        raise e
 
 
 def init_app() -> FastAPI:

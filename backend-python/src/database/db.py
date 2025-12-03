@@ -6,6 +6,7 @@ from pymongo.asynchronous.client_session import AsyncClientSession
 from pymongo.errors import ConnectionFailure
 
 from src.core.config import settings
+from src.core.logger import logger_main as logger
 from src.utils.model_registration import ModelRegistration
 
 
@@ -42,8 +43,8 @@ class DatabaseManager:
             >>> await DatabaseManager.init_db()
         """
         try:
-            if cls.__client is None:  # Updated reference
-                cls.__client = AsyncMongoClient(  # Updated reference
+            if cls.__client is None:
+                cls.__client = AsyncMongoClient(
                     settings.CONNECTION_STRING.get_secret_value(),
                     minPoolSize=settings.MONGODB_MIN_POOL_SIZE,
                     maxPoolSize=settings.MONGODB_MAX_POOL_SIZE,
@@ -55,23 +56,19 @@ class DatabaseManager:
                 )
 
                 is_pinged = await cls.ping_db()
-                if is_pinged:
-                    print("MongoDB connection established successfully")
-                else:
-                    cls.__client = None  # Updated reference
-                    print("MongoDB connection failed: Unable to ping the server")
+                if not is_pinged:
+                    cls.__client = None
+                    logger.info("Client is cleared due to failed ping")
 
-                if cls.__client is not None:  # Updated reference
+                if cls.__client is not None:
                     await init_beanie(
-                        database=cls.__client.get_database(
-                            settings.MONGODB_NAME
-                        ),  # Updated reference
+                        database=cls.__client.get_database(settings.MONGODB_NAME),
                         document_models=ModelRegistration.get_registered_models(),
                     )
-                    print("Beanie/Database initialized successfully")
+                    logger.info("Beanie/Database initialized successfully")
 
         except Exception as e:
-            print(f"Error initializing Beanie/Database: {e}")
+            logger.error(f"Error initializing Beanie/Database: {e}", exc_info=True)
             raise e
 
     @classmethod
@@ -85,15 +82,15 @@ class DatabaseManager:
         Example:
             >>> await DatabaseManager.close_db()
         """
-        if cls.__client is not None:  # Updated reference
+        if cls.__client is not None:
             try:
-                await cls.__client.close()  # Updated reference
-                cls.__client = None  # Updated reference
-                print("Database connection closed successfully")
+                await cls.__client.close()
+                cls.__client = None
+                logger.info("Database connection closed successfully")
             except Exception as e:
-                print(f"Error closing database connection: {e}")
+                logger.error(f"Error closing database connection: {e}")
         else:
-            print("No database connection to close")
+            logger.info("No database connection to close")
 
     @classmethod
     def get_client(cls: Type["DatabaseManager"]) -> Optional[AsyncMongoClient]:
@@ -113,7 +110,7 @@ class DatabaseManager:
             ...     result = await collection.find_one({"name": "example"})
             ...     print(result)
         """
-        return cls.__client  # Updated reference
+        return cls.__client
 
     @classmethod
     async def get_session(cls: Type["DatabaseManager"]) -> Optional[AsyncClientSession]:
@@ -135,10 +132,10 @@ class DatabaseManager:
             ...         print(result)
         """
 
-        if cls.__client is None:  # Updated reference
+        if cls.__client is None:
             print("No database client available for session")
             return None
-        return cls.__client.start_session()  # Updated reference
+        return cls.__client.start_session()
 
     @classmethod
     async def ping_db(cls: Type["DatabaseManager"]) -> bool:
@@ -156,9 +153,13 @@ class DatabaseManager:
             ...     print("Database is connected")
         """
         try:
-            if cls.__client:  # Updated reference
-                await cls.__client.admin.command("ping")  # Updated reference
+            if cls.__client:
+                await cls.__client.admin.command("ping")
+                logger.info("Database ping successful")
                 return True
+            logger.warning("MongoDB connection failed: Unable to ping the server")
             return False
-        except ConnectionFailure:
-            return False
+        except ConnectionFailure as e:
+            logger.error("Database ping failed: Connection failure", exc_info=True)
+            raise e
+            # return False
