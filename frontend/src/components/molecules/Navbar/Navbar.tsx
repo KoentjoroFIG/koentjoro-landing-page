@@ -4,6 +4,7 @@ import { SignUpDialog } from "@/components/molecules/Auth/SignUpDialog";
 import { ForgotPasswordDialog } from "@/components/molecules/Auth/ForgotPasswordDialog";
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
+import { getEnv } from "@/lib/config";
 
 interface Props {
   children?: ReactNode;
@@ -103,7 +104,7 @@ const Navbar = ({ children }: Props) => {
                   </a>
                 ))}
                 {/* Show Sign In only when auth feature flag is enabled */}
-                {import.meta.env.VITE_ENABLE_AUTH === "true" && (
+                {getEnv.VITE_ENABLE_AUTH === "true" && (
                   <Button
                     className="ml-4 bg-sky-500 hover:bg-sky-600 text-white"
                     onClick={() => setIsSignInOpen(true)}

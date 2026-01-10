@@ -1,13 +1,14 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import firebase_admin
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
 from src.core.logger import logger_config
 from src.core.logger import logger_main as logger
-from src.database.db import DatabaseManager
+from src.domain import router as domain_router
 
 from .utils.monitor import MonitorUtils
 
@@ -16,13 +17,15 @@ from .utils.monitor import MonitorUtils
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         logger_config.setup_logger()
-        await DatabaseManager.init_db()
+        # await DatabaseManager.init_db()
+        default_app = firebase_admin.initialize_app()
     except Exception as e:
         logger.critical(f"Error during startup: {e}")
         raise e
     yield
     try:
-        await DatabaseManager.close_db()
+        # await DatabaseManager.close_db()
+        firebase_admin.delete_app(default_app)
         logger.info("Application shutdown completed successfully.")
         logger_config.stop_logger()
     except Exception as e:
@@ -52,6 +55,8 @@ def init_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    app.include_router(domain_router, prefix="/api")
 
     return app
 

@@ -13,7 +13,7 @@ update-prod-lock:
 	uv pip compile requirement.prod.txt -o uv.prod.lock
 
 run:
-	uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+	uvicorn src.main:app --host 0.0.0.0 --port 1911 --reload
 
 pre-commit:
 	pre-commit run --all-files

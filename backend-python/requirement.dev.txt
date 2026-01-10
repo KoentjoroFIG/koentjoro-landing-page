@@ -11,3 +11,4 @@ pytest
 pytest-mock
 pytest-asyncio
 pre-commit
+firebase-admin

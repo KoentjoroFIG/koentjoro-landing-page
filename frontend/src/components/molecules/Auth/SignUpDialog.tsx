@@ -10,6 +10,7 @@ import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
 import { Label } from "@/components/atoms/label";
 import { GoogleIcon } from "@/components/atoms/Icons/google";
+import { signUpWithEmailPassword } from "@/lib/firebase";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -40,7 +41,8 @@ export function SignUpDialog({
     setIsLoading(true);
 
     // TODO: Implement email/password sign up logic
-    console.log("Sign up with:", { name, email, password });
+    const result = await signUpWithEmailPassword(email, password);
+    console.log("Sign up with:", { name, email, result });
 
     // Simulate API call
     setTimeout(() => {

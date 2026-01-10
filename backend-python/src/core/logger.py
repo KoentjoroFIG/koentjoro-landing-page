@@ -8,6 +8,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, MutableMapping, Self, override
 
+from src.core.config import settings
+
 LOG_RECORD_BUILTIN_ATTRS = {
     "args",
     "asctime",
@@ -38,9 +40,11 @@ LOG_RECORD_BUILTIN_ATTRS = {
 class LoggerConfig:
     def __init__(self: Self, config_file: dict[str, Any]) -> None:
         self.config_file = config_file
+        self.log_level = "DEBUG" if settings.APP_STAGE == "development" else "INFO"
 
     def setup_logger(self: Self) -> None:
         logging.config.dictConfig(self.config_file)
+        logging.getLogger().setLevel(self.log_level)
         queue_handler = logging.getHandlerByName("queue")
         if (
             queue_handler is not None
@@ -242,7 +246,7 @@ class ContextLogger(logging.LoggerAdapter):
 
 @lru_cache()
 def get_logger_config() -> LoggerConfig:
-    config_path = Path("src/core/logger_config.json")
+    config_path = Path(__file__).parent / "logger_config.json"
     with config_path.open("r", encoding="utf-8") as f:
         config_data = json.load(f)
     logger_config = LoggerConfig(config_data)

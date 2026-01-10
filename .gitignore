@@ -52,6 +52,9 @@ coverage.xml
 htmlcov/
 .coverage
 
+#playground folder
+playground/
+
 # Python env / secrets
 .env
 .env.*
