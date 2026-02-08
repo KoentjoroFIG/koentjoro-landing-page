@@ -4,6 +4,7 @@ from typing import Optional, Self, override
 
 import jwt
 from pydantic import SecretStr
+from src.domain.auth.schema import TokenPayload
 
 
 class TokenStrategy(ABC):
@@ -12,14 +13,14 @@ class TokenStrategy(ABC):
     """
 
     @abstractmethod
-    def encode(self: Self, payload: dict) -> Optional[str]:
+    def encode(self: Self, payload: TokenPayload) -> Optional[str]:
         """
         Encode the given payload into a token.
         """
         pass
 
     @abstractmethod
-    def decode(self: Self, token: str) -> Optional[dict]:
+    def decode(self: Self, token: str) -> Optional[TokenPayload]:
         """
         Decode the given token into a payload.
         """
@@ -31,29 +32,29 @@ class BaseJWT:
     Base class for JWT operations.
     """
 
-    def __add_exp(self: Self, payload: dict, expires_in: int) -> dict:
+    def __add_exp(self: Self, payload: TokenPayload, expires_in: int) -> TokenPayload:
         """
         Add expiration time to the payload.
 
         Args:
-            payload (dict): The original payload.
+            payload (TokenPayload): The original payload.
             expires_in (int): Expiration time in seconds.
 
         Returns:
-            dict: Payload with expiration time added.
+            TokenPayload: Payload with expiration time added.
         """
-        payload = payload.copy()
-        payload["exp"] = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        exp_time = datetime.now(tz=timezone.utc) + timedelta(seconds=expires_in)
+        payload.exp = int(exp_time.timestamp())
         return payload
 
     def __encode(
-        self: Self, payload: dict, secret: SecretStr, algorithm: str, expires_in: int
+        self: Self, payload: TokenPayload, secret: SecretStr, algorithm: str, expires_in: int
     ) -> Optional[str]:
         """
         Encode the payload into a JWT token.
 
         Args:
-            payload (dict): The payload to encode.
+            payload (TokenPayload): The payload to encode.
             secret (SecretStr): The secret key for encoding.
             algorithm (str): The algorithm to use for encoding.
             expires_in (int): Expiration time in seconds.
@@ -62,8 +63,10 @@ class BaseJWT:
             Optional[str]: Encoded JWT token or None if an error occurs.
         """
         try:
+            payload = self.__add_exp(payload, expires_in)
+
             return jwt.encode(
-                self.__add_exp(payload, expires_in),
+                payload.model_dump(),
                 secret.get_secret_value(),
                 algorithm=algorithm,
             )
@@ -73,7 +76,7 @@ class BaseJWT:
 
     def __decode(
         self: Self, token: str, secret: SecretStr, algorithm: str
-    ) -> Optional[dict]:
+    ) -> Optional[TokenPayload]:
         """
         Decode the JWT token into a payload.
 
@@ -83,10 +86,11 @@ class BaseJWT:
             algorithm (str): The algorithm to use for decoding.
 
         Returns:
-            Optional[dict]: Decoded payload or None if an error occurs.
+            Optional[TokenPayload]: Decoded payload or None if an error occurs.
         """
         try:
-            return jwt.decode(token, secret.get_secret_value(), algorithms=[algorithm])
+            payload = jwt.decode(token, secret.get_secret_value(), algorithms=[algorithm])
+            return TokenPayload.model_validate(payload)
         except jwt.ExpiredSignatureError:
             print(f"Token has expired: {token}")
         except jwt.InvalidTokenError:
@@ -112,12 +116,12 @@ class JWTAccessToken(TokenStrategy, BaseJWT):
         self.expires_in = expires_in
 
     @override
-    def encode(self: Self, payload: dict) -> Optional[str]:
+    def encode(self: Self, payload: TokenPayload) -> Optional[str]:
         """
         Encode the given payload into a JWT access token.
 
         Args:
-            payload (dict): The payload to encode.
+            payload (TokenPayload): The payload to encode.
 
         Returns:
             Optional[str]: Encoded JWT access token or None if an error occurs.
@@ -125,7 +129,7 @@ class JWTAccessToken(TokenStrategy, BaseJWT):
         return self.__encode(payload, self.secret_key, self.algorithm, self.expires_in)
 
     @override
-    def decode(self: Self, token: str) -> Optional[dict]:
+    def decode(self: Self, token: str) -> Optional[TokenPayload]:
         """
         Decode the given JWT access token into a payload.
 
@@ -133,9 +137,12 @@ class JWTAccessToken(TokenStrategy, BaseJWT):
             token (str): The JWT access token to decode.
 
         Returns:
-            Optional[dict]: Decoded payload or None if an error occurs.
+            Optional[TokenPayload]: Decoded payload or None if an error occurs.
         """
-        return self.__decode(token, self.secret_key, self.algorithm)
+        decoded_payload = self.__decode(token, self.secret_key, self.algorithm)
+        if decoded_payload is not None:
+            return decoded_payload
+        return None
 
 
 class JWTRefreshToken(TokenStrategy, BaseJWT):
@@ -156,12 +163,12 @@ class JWTRefreshToken(TokenStrategy, BaseJWT):
         self.expires_in = expires_in
 
     @override
-    def encode(self: Self, payload: dict) -> Optional[str]:
+    def encode(self: Self, payload: TokenPayload) -> Optional[str]:
         """
         Encode the given payload into a JWT refresh token.
 
         Args:
-            payload (dict): The payload to encode.
+            payload (TokenPayload): The payload to encode.
 
         Returns:
             Optional[str]: Encoded JWT refresh token or None if an error occurs.
@@ -169,7 +176,7 @@ class JWTRefreshToken(TokenStrategy, BaseJWT):
         return self.__encode(payload, self.secret_key, self.algorithm, self.expires_in)
 
     @override
-    def decode(self: Self, token: str) -> Optional[dict]:
+    def decode(self: Self, token: str) -> Optional[TokenPayload]:
         """
         Decode the given JWT refresh token into a payload.
 
@@ -177,9 +184,12 @@ class JWTRefreshToken(TokenStrategy, BaseJWT):
             token (str): The JWT refresh token to decode.
 
         Returns:
-            Optional[dict]: Decoded payload or None if an error occurs.
+            Optional[TokenPayload]: Decoded payload or None if an error occurs.
         """
-        return self.__decode(token, self.secret_key, self.algorithm)
+        decoded_payload = self.__decode(token, self.secret_key, self.algorithm)
+        if decoded_payload is not None:
+            return decoded_payload
+        return None
 
 
 class TokenFactory:
@@ -193,19 +203,19 @@ class TokenFactory:
     def __init__(self: Self, strategy: TokenStrategy) -> None:
         self.strategy = strategy
 
-    def create_token(self: Self, data: dict) -> Optional[str]:
+    def create_token(self: Self, payload: TokenPayload) -> Optional[str]:
         """
         Create a token using the specified strategy.
 
         Args:
-            data (dict): The payload data for the token.
+            payload (TokenPayload): The payload data for the token.
 
         Returns:
             Optional[str]: The created token or None if an error occurs.
         """
-        return self.strategy.encode(data)
+        return self.strategy.encode(payload)
 
-    def verify_token(self: Self, token: str) -> Optional[dict]:
+    def verify_token(self: Self, token: str) -> Optional[TokenPayload]:
         """
         Verify a token using the specified strategy.
 
@@ -213,6 +223,6 @@ class TokenFactory:
             token (str): The token to verify.
 
         Returns:
-            Optional[dict]: Decoded payload or None if an error occurs.
+            Optional[TokenPayload]: Decoded payload or None if an error occurs.
         """
         return self.strategy.decode(token)

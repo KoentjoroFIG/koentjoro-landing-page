@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger_config.setup_logger()
         # await DatabaseManager.init_db()
         default_app = firebase_admin.initialize_app()
+        logger.info("Application startup completed successfully.")
     except Exception as e:
         logger.critical(f"Error during startup: {e}")
         raise e

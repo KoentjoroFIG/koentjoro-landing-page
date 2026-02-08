@@ -17,20 +17,27 @@ from src.utils.model_registration import ModelRegistration
 class UserModel(Document, TimestampedModel, SoftDeleteModel):
     """User model for storing user information."""
 
-    username: Optional[str] = Field(default=None, description="The user's username")
+    full_name: Optional[str] = Field(default=None, description="The user's full name")
     email: EmailStr = Field(..., description="The user's email address")
     method: AuthMethod = Field(
         default=AuthMethod.EMAIL, description="The authentication method used"
     )
-    is_verified: bool = Field(
+    is_verified: Optional[bool] = Field(
         default=False, description="Whether the user's email is verified"
     )
     tokens: List[Link["UserTokenModel"]] = Field(
         ..., description="Reference to the user's tokens"
     )
+    firebase_uid: Optional[str] = Field(
+        default=None, description="The unique user ID from Firebase/Google"
+    )
 
     class Settings:
         name = "users"
+        indexes = [
+            {"fields": ["firebase_uid"], "unique": True, "sparse": True},
+            {"fields": ["email"], "unique": True},
+        ]
 
 
 @ModelRegistration.register_model
