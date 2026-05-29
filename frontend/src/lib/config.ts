@@ -4,7 +4,8 @@ const envSchema = z.object({
   // App Config
   VITE_API_BASE_URL: z.string().default("http://localhost:1911/api"),
   VITE_FRONT_BASE_URL: z.string().default("http://localhost:5173"),
-  VITE_ENABLE_AUTH: z.string().default("false"),
+  VITE_ENABLE_AUTH: z.string().default("true"),
+  VITE_ENABLE_BID: z.string().default("true"),
 
   // Firebase Config
   VITE_FIREBASE_API_KEY: z.string(),

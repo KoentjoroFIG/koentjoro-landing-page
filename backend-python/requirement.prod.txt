@@ -7,3 +7,5 @@ pydantic-settings
 pyjwt
 passlib[bcrypt]
 pymongo
+aiosmtplib
+firebase-admin

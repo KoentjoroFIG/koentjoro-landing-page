@@ -10,7 +10,7 @@ import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
 import { Label } from "@/components/atoms/label";
 import { GoogleIcon } from "@/components/atoms/Icons/google";
-import { signUpWithEmailPassword } from "@/lib/firebase";
+import { signUpWithEmailPassword, signInWithGoogle } from "@/lib/firebase";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -28,42 +28,49 @@ export function SignUpDialog({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate passwords match
     if (password !== confirmPassword) {
-      alert("Passwords don't match!");
+      setError("Passwords don't match!");
       return;
     }
 
     setIsLoading(true);
+    setError("");
 
-    // TODO: Implement email/password sign up logic
-    const result = await signUpWithEmailPassword(email, password);
-    console.log("Sign up with:", { name, email, result });
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signUpWithEmailPassword(email, password);
+      onOpenChange(false);
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Sign up failed. Please try again.";
+      setError(message);
+    } finally {
       setIsLoading(false);
-      // Close dialog on success
-      // onOpenChange(false);
-    }, 1000);
+    }
   };
 
   const handleGoogleSignUp = async () => {
     setIsLoading(true);
+    setError("");
 
-    // TODO: Implement Google OAuth sign up logic
-    console.log("Sign up with Google");
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signInWithGoogle();
+      onOpenChange(false);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Google sign up failed. Please try again.";
+      setError(message);
+    } finally {
       setIsLoading(false);
-      // Close dialog on success
-      // onOpenChange(false);
-    }, 1000);
+    }
   };
 
   const handleSwitchToSignIn = () => {
@@ -84,6 +91,12 @@ export function SignUpDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {error && (
+            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md">
+              {error}
+            </div>
+          )}
+
           {/* Google Sign Up Button */}
           <Button
             type="button"

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/atoms/button";
+import { getEnv } from "@/lib/config";
 
 interface ContactSectionProps {
   className?: string;
@@ -12,16 +13,36 @@ export function ContactSection({ className = "" }: ContactSectionProps) {
     email: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Contact form submitted:", contactFormData);
-    alert("Thank you for your message! I will get back to you soon.");
-    setContactFormData({
-      name: "",
-      email: "",
-      message: "",
-    });
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch(`${getEnv.VITE_API_BASE_URL}/email/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactFormData),
+      });
+      const data = await response.json();
+      setSubmitStatus({ success: data.success, message: data.message });
+      if (data.success) {
+        setContactFormData({ name: "", email: "", message: "" });
+      }
+    } catch {
+      setSubmitStatus({
+        success: false,
+        message: "Network error. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -113,10 +134,19 @@ export function ContactSection({ className = "" }: ContactSectionProps) {
 
                 <Button
                   type="submit"
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 md:py-4 text-lg font-semibold"
+                  disabled={isSubmitting}
+                  className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 md:py-4 text-lg font-semibold disabled:opacity-50"
                 >
-                  Send Message
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
+
+                {submitStatus && (
+                  <p
+                    className={`text-sm text-center ${submitStatus.success ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {submitStatus.message}
+                  </p>
+                )}
               </form>
             </div>
           </div>

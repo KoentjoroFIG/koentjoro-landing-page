@@ -3,7 +3,13 @@ import { initializeApp } from "firebase/app";
 import {
   getAuth,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   sendEmailVerification,
+  sendPasswordResetEmail,
+  signOut,
+  type User,
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -18,6 +24,20 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+async function verifyTokenWithBackend(user: User) {
+  const idToken = await user.getIdToken();
+  const response = await fetch(`${getEnv.VITE_API_BASE_URL}/auth/verify-token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id_token: idToken }),
+  });
+  if (!response.ok) {
+    throw new Error("Backend token verification failed");
+  }
+  return response.json();
+}
 
 export const signUpWithEmailPassword = async (
   email: string,
@@ -25,11 +45,32 @@ export const signUpWithEmailPassword = async (
 ) => {
   const result = await createUserWithEmailAndPassword(auth, email, password);
   const actionCodeSettings = {
-    url: "http://localhost:1911/isVerified",
+    url: `${getEnv.VITE_FRONT_BASE_URL}/home`,
     handleCodeInApp: true,
   };
   await sendEmailVerification(result.user, actionCodeSettings);
-  const id_token = await auth.currentUser?.getIdToken();
-  console.log("ID Token:", id_token);
-  return result;
+  const backendAuth = await verifyTokenWithBackend(result.user);
+  return { user: result.user, ...backendAuth };
 };
+
+export const signInWithEmail = async (email: string, password: string) => {
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  const backendAuth = await verifyTokenWithBackend(result.user);
+  return { user: result.user, ...backendAuth };
+};
+
+export const signInWithGoogle = async () => {
+  const result = await signInWithPopup(auth, googleProvider);
+  const backendAuth = await verifyTokenWithBackend(result.user);
+  return { user: result.user, ...backendAuth };
+};
+
+export const resetPassword = async (email: string) => {
+  await sendPasswordResetEmail(auth, email);
+};
+
+export const logout = async () => {
+  await signOut(auth);
+};
+
+export { auth };

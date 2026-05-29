@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Lightbulb, Lock, ChartBar, Crown, ArrowUp } from "lucide-react";
 import { Button } from "@/components/atoms/button";
+import { getEnv } from "@/lib/config";
 
 interface BidToHireSectionProps {
   className?: string;
@@ -17,6 +18,12 @@ export function BidToHireSection({ className = "" }: BidToHireSectionProps) {
     benefits: [] as string[],
     message: "",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   const offers = [
     {
@@ -75,21 +82,46 @@ export function BidToHireSection({ className = "" }: BidToHireSectionProps) {
     }
   };
 
-  const handleBidSubmit = (e: React.FormEvent) => {
+  const handleBidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Bid form submitted:", bidFormData);
-    alert(
-      "Thank you for your offer! I will review it and get back to you soon."
-    );
-    setBidFormData({
-      companyName: "",
-      position: "",
-      worksite: "",
-      type: "",
-      salary: "",
-      benefits: [],
-      message: "",
-    });
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch(`${getEnv.VITE_API_BASE_URL}/email/bid`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company_name: bidFormData.companyName,
+          position: bidFormData.position,
+          worksite: bidFormData.worksite,
+          type: bidFormData.type,
+          salary: bidFormData.salary,
+          benefits: bidFormData.benefits,
+          message: bidFormData.message,
+        }),
+      });
+      const data = await response.json();
+      setSubmitStatus({ success: data.success, message: data.message });
+      if (data.success) {
+        setBidFormData({
+          companyName: "",
+          position: "",
+          worksite: "",
+          type: "",
+          salary: "",
+          benefits: [],
+          message: "",
+        });
+      }
+    } catch {
+      setSubmitStatus({
+        success: false,
+        message: "Network error. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getRankBadgeStyle = (badge: string) => {
@@ -343,10 +375,19 @@ export function BidToHireSection({ className = "" }: BidToHireSectionProps) {
 
               <Button
                 type="submit"
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 md:py-4 text-lg font-semibold"
+                disabled={isSubmitting}
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 md:py-4 text-lg font-semibold disabled:opacity-50"
               >
-                Submit Offer
+                {isSubmitting ? "Submitting..." : "Submit Offer"}
               </Button>
+
+              {submitStatus && (
+                <p
+                  className={`text-sm text-center mt-3 ${submitStatus.success ? "text-green-600" : "text-red-600"}`}
+                >
+                  {submitStatus.message}
+                </p>
+              )}
             </form>
 
             <div className="flex items-center mt-6 md:mt-8 p-4 md:p-5 bg-sky-50 rounded-lg">

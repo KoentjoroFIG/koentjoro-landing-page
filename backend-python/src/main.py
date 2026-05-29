@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.core.config import settings
 from src.core.logger import logger_config
 from src.core.logger import logger_main as logger
+from src.database.db import DatabaseManager
 from src.domain import router as domain_router
 
 from .utils.monitor import MonitorUtils
@@ -17,14 +18,14 @@ from .utils.monitor import MonitorUtils
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         logger_config.setup_logger()
-        # await DatabaseManager.init_db()
+        await DatabaseManager.init_db()
         default_app = firebase_admin.initialize_app()
     except Exception as e:
         logger.critical(f"Error during startup: {e}")
         raise e
     yield
     try:
-        # await DatabaseManager.close_db()
+        await DatabaseManager.close_db()
         firebase_admin.delete_app(default_app)
         logger.info("Application shutdown completed successfully.")
         logger_config.stop_logger()
@@ -48,9 +49,11 @@ def init_app() -> FastAPI:
     async def health_check() -> dict:
         return await MonitorUtils.get_health_status()
 
+    origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["localhost:1911", "http://localhost:1911"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

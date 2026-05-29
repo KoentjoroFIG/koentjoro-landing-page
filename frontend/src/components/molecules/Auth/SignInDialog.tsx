@@ -10,6 +10,7 @@ import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
 import { Label } from "@/components/atoms/label";
 import { GoogleIcon } from "@/components/atoms/Icons/google";
+import { signInWithEmail, signInWithGoogle } from "@/lib/firebase";
 
 interface SignInDialogProps {
   open: boolean;
@@ -27,34 +28,41 @@ export function SignInDialog({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // TODO: Implement email/password sign in logic
-    console.log("Sign in with:", { email, password });
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signInWithEmail(email, password);
+      onOpenChange(false);
+      setEmail("");
+      setPassword("");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Sign in failed. Please try again.";
+      setError(message);
+    } finally {
       setIsLoading(false);
-      // Close dialog on success
-      // onOpenChange(false);
-    }, 1000);
+    }
   };
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError("");
 
-    // TODO: Implement Google OAuth sign in logic
-    console.log("Sign in with Google");
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signInWithGoogle();
+      onOpenChange(false);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Google sign in failed. Please try again.";
+      setError(message);
+    } finally {
       setIsLoading(false);
-      // Close dialog on success
-      // onOpenChange(false);
-    }, 1000);
+    }
   };
 
   const handleSwitchToSignUp = () => {
@@ -80,6 +88,12 @@ export function SignInDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {error && (
+            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md">
+              {error}
+            </div>
+          )}
+
           {/* Google Sign In Button */}
           <Button
             type="button"

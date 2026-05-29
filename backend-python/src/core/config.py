@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     APP_STAGE: str = ""
     BASE_URL: str = ""
 
+    # CORS
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:1911"
+
     # MongoDB Settings
     CONNECTION_STRING: SecretStr = SecretStr("")
     MONGODB_NAME: str = ""

@@ -1,5 +1,19 @@
 name: koentjoro
 services:
+  backend:
+    build:
+      context: ./backend-python
+      dockerfile: ./docker/dockerfile
+    networks:
+      - backend
+      - shared_proxy_network
+    env_file:
+      - ./backend-python/.env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/firebase-service-account.json
+    volumes:
+      - ./backend-python/firebase-service-account.json:/app/firebase-service-account.json:ro
+
   frontend:
     build:
       context: ./frontend
@@ -7,7 +21,6 @@ services:
     networks:
       - frontend
       - shared_proxy_network
-    # Ports removed - accessed via reverse proxy
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
 

@@ -10,6 +10,7 @@ import { Button } from "@/components/atoms/button";
 import { Input } from "@/components/atoms/input";
 import { Label } from "@/components/atoms/label";
 import { CheckCircle } from "lucide-react";
+import { resetPassword } from "@/lib/firebase";
 
 interface ForgotPasswordDialogProps {
   open: boolean;
@@ -25,19 +26,23 @@ export function ForgotPasswordDialog({
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // TODO: Implement forgot password logic
-    console.log("Reset password for:", email);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await resetPassword(email);
       setIsEmailSent(true);
-    }, 1000);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to send reset email. Please try again.";
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBackToSignIn = () => {
@@ -74,6 +79,12 @@ export function ForgotPasswordDialog({
             </DialogHeader>
 
             <div className="space-y-6 py-4">
+              {error && (
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md">
+                  {error}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="forgot-email">Email</Label>
